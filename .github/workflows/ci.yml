@@ -1,0 +1,16 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install Icarus Verilog
+      run: sudo apt-get update && sudo apt-get install -y iverilog
+    - name: Compile check
+      run: |
+        for file in *.v; do
+          [ -e "${file}" ] || continue
+          iverilog -o dummy.out "${file}" || exit 1
+        done
+        echo "Verilog files compiled successfully."
