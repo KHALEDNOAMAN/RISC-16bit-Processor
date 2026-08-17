@@ -58,7 +58,58 @@ Open the generated `.vcd` file in GTKWave:
 - [ ] Interrupt Handling
 - [ ] Memory Management Unit (MMU)
 
-## 🤝 Contributing
+## 🤝 
+---
+
+## How It Works
+
+### Pipeline Stages
+1. **IF (Instruction Fetch)**: PC → Instruction Memory → IR
+2. **ID (Instruction Decode)**: IR → Control Unit + Register File read
+3. **EX (Execute)**: ALU performs operation, branch target calculated
+4. **MEM (Memory Access)**: Load/Store from Data Memory
+5. **WB (Write Back)**: Result written to Register File
+
+### Hazard Handling
+- **Data Hazards**: Resolved via forwarding (EX→EX, MEM→EX)
+- **Control Hazards**: Branch prediction with 1-cycle penalty on mispredict
+- **Structural Hazards**: Separate instruction and data memories (Harvard)
+
+---
+
+## Screenshots & Demo
+
+### Waveform Output (GTKWave)
+```
+Time    0ns   10ns  20ns  30ns  40ns  50ns  60ns
+CLK     ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐ ┌─┐
+        │ └─┘ └─┘ └─┘ └─┘ └─┘ └─┘ └
+PC      │ 00 │ 02 │ 04 │ 06 │ 08 │ 0A │
+IR      │NOP │ADD │SUB │AND │LD  │ST  │
+ALU_out │ 00 │ 07 │ 03 │ 05 │ -- │ -- │
+RegW    │ 0  │ 1  │ 1  │ 1  │ 1  │ 0  │
+```
+
+### Example Program
+```assembly
+; Calculate sum of 1+2+3
+LOAD  R1, #1      ; R1 = 1
+LOAD  R2, #2      ; R2 = 2
+ADD   R3, R1, R2  ; R3 = 3
+LOAD  R4, #3      ; R4 = 3
+ADD   R5, R3, R4  ; R5 = 6 (result)
+STORE R5, [0x10]  ; Store to memory
+```
+
+### Running the Simulation
+```bash
+iverilog -o cpu_tb testbench/cpu_tb.v src/*.v
+vvp cpu_tb
+gtkwave cpu_tb.vcd    # View waveforms
+```
+
+
+Contributing
 Contributions are welcome! Please open an issue or submit a pull request.
 
 ## 📄 License
